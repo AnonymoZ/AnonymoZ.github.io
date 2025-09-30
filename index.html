@@ -21,18 +21,30 @@
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
+    .view-toggle {
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
 
   <div class="container py-5">
-    <h1 class="text-center mb-4">360° Property Tour</h1>
+    <h1 class="text-center mb-2">360° Property Tour</h1>
+    <h5 class="text-center text-muted mb-4">Best viewed horizontally</h5>
+
+    <!-- Toggle Buttons -->
+    <div class="text-center mb-3">
+      <div class="btn-group view-toggle" role="group" aria-label="View options">
+        <button id="btnPC" type="button" class="btn">💻 PC (hi-res)</button>
+        <button id="btnMobile" type="button" class="btn">📱 Mobile (low-res)</button>
+      </div>
+    </div>
 
     <!-- Panorama Viewer -->
     <div id="panorama"></div>
 
     <!-- Footer / Branding -->
-    <div class="text-center mt-4 text-muted">
+    <div class="text-center mt-4 text-muted" id="branding">
       <p>Presented by <strong>Your Photography Business</strong></p>
     </div>
   </div>
@@ -44,13 +56,53 @@
   <script src="https://cdn.jsdelivr.net/npm/pannellum/build/pannellum.js"></script>
 
   <script>
-    pannellum.viewer('panorama', {
-      type: 'equirectangular',
-      panorama: 'house-pano.jpg',   // replace with your pano
-      autoLoad: true,
-      autoRotate: -2,               // slow spin for demo
-      compass: true,
-      showZoomCtrl: true
+    let viewer;
+
+    // Detect default mode
+    const isMobile = window.innerWidth < 768;
+    let panoFile = isMobile ? 'house-pano.jpg' : 'input.jpg';
+    let currentMode = isMobile ? 'mobile' : 'pc';
+
+    // Function to load panorama
+    function loadPanorama(file, mode) {
+      if (viewer) {
+        viewer.destroy(); // remove old viewer instance
+      }
+      viewer = pannellum.viewer('panorama', {
+        type: 'equirectangular',
+        panorama: file,
+        autoLoad: true,
+        autoRotate: -2,
+        compass: true,
+        showZoomCtrl: true
+      });
+      updateButtons(mode);
+    }
+
+    // Update button styling
+    function updateButtons(mode) {
+      const btnPC = document.getElementById('btnPC');
+      const btnMobile = document.getElementById('btnMobile');
+
+      if (mode === 'pc') {
+        btnPC.className = "btn btn-primary";
+        btnMobile.className = "btn btn-outline-secondary";
+      } else {
+        btnPC.className = "btn btn-outline-secondary";
+        btnMobile.className = "btn btn-primary";
+      }
+    }
+
+    // Initial load
+    loadPanorama(panoFile, currentMode);
+
+    // Button events
+    document.getElementById('btnPC').addEventListener('click', () => {
+      loadPanorama('input.jpg', 'pc');
+    });
+
+    document.getElementById('btnMobile').addEventListener('click', () => {
+      loadPanorama('house-pano.jpg', 'mobile');
     });
   </script>
 </body>
